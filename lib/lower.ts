@@ -20,13 +20,14 @@ import { Unit } from './ir/unit';
 export default function lower(ast: AstNode): AstNode {
   return match<AstNode>(ast, {
     Constant: clone,
-    Reference: clone,
+    Reference(ast: Reference) {
+      if(ast.refname === "null") return new Unit(ast.line);
+      return clone(ast);
+    },
     Vector: cloneWithLoweredChildren((node) => new Vector(node.line)),
     Root: cloneWithLoweredChildren(() => new RootNode()),
 
     List(ast: List) {
-      if(ast.children.length === 0) return new Unit(ast.line);
-
       const head = ast.head;
 
       if(head instanceof Reference) {

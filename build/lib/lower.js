@@ -15,12 +15,14 @@ var unit_1 = require('./ir/unit');
 function lower(ast) {
     return match_1.match(ast, {
         Constant: clone,
-        Reference: clone,
+        Reference: function (ast) {
+            if (ast.refname === "null")
+                return new unit_1.Unit(ast.line);
+            return clone(ast);
+        },
         Vector: cloneWithLoweredChildren(function (node) { return new vector_1.Vector(node.line); }),
         Root: cloneWithLoweredChildren(function () { return new root_node_1.RootNode(); }),
         List: function (ast) {
-            if (ast.children.length === 0)
-                return new unit_1.Unit(ast.line);
             var head = ast.head;
             if (head instanceof reference_1.Reference) {
                 if (head.refname === "def")
