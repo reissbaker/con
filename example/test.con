@@ -1,0 +1,23 @@
+;*
+this is a test file to make sure the con compiler works.
+*;
+
+(def add-five [ x ]
+  (let [
+      (y 5)
+    ] (+ x y)))
+
+(add-five 5)
+
+;; lazily evaluate `val` and `def` calls during macro expansion.
+;; strictly evaluate them at runtime.
+(val z (add-five 10))
+
+(val t true)
+
+(val unit ())
+
+;; export is a macro that exports the val, def, or defmacro it precedes
+;; (export val version 0)
+
+(add-five 2)

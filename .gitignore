@@ -1,0 +1,15 @@
+*~
+*.swp
+*.swo
+
+.DS_Store
+
+node_modules/
+typings/
+
+build/*.min.*
+build/*.gz
+build/*.png
+build/*/*.png
+
+test/**/*.js
