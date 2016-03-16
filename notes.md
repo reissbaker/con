@@ -246,3 +246,17 @@ should have docs auto-generated for it and accessible on the web.
 
 
 include a repl and a debugger in the `con` program as well.
+
+
+
+support named arguments for functions that are expanded to normal, positional
+function calls at compile-time. this works because you never have raw structs
+at runtime: you have typed pointers created from `new` taking a struct.
+
+
+
+Swap the [] and () in `let` and `import`. It makes macro usage confusing. TBD:
+should it just be entirely vectors? That makes the most sense, but feels wrong
+for some reason. Probably feels weird because of the array-of-arrays for a
+single var decl: maybe have it so that you can either have an array of arrays,
+or a single two-element array of var-name and value.
