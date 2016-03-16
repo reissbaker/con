@@ -20,4 +20,4 @@ this is a test file to make sure the con compiler works.
 ;; export is a macro that exports the val, def, or defmacro it precedes
 ;; (export val version 0)
 
-(add-five 2)
+(- 5 (+ 3 (add-five 1))
