@@ -435,3 +435,15 @@ similar to Go, pointers should be implicitly dereferenced when using
 dot-accessors. for example, x.y should retrieve the value of y if y is an
 unboxed value, and should retrieve the value stored at memory location y if y
 is a pointer.
+
+
+
+Add two more variants of comments:
+
+1. `//` and `/* ... */`
+2. `/- ... -/`
+
+The former are for doc-comments a la the `///` syntax from Rust, and the latter
+is for file-level comments and may only appear at the beginning of a file (sort
+of similar to `//!` from Rust, but more restricted).
+
