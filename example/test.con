@@ -27,4 +27,4 @@ them in the scope tree.
 ;; public is a macro that exports the val, def, or defmacro it precedes
 ;; (public val version 0)
 
-(- 5 (+ 3 (add-five 1)))
+(- 5 (+ 3 (add-five z)))
