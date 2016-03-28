@@ -3,17 +3,19 @@ some general notes:
 try to make the language constructs use simple, varied english. for example,
 prefer `macro` to `defmacro`, `type` to `deftype`, etc. strive to make the
 functions take the simplest, least-powerful objects: a type should take a
-struct, not have special syntax or a sexpr dsl. where possible, keep function
-APIs similar — especially if the functions perform similar behavior (`import`
-and `let` both add things to the scope, for example, so they should be
-structured similarly). respect programmers' time in learning your language.
+struct, not have special syntax or a sexpr dsl. prefer transforms over option
+structs or other configuration. where possible, keep function APIs similar —
+especially if the functions perform similar behavior (`import` and `let` both
+add things to the scope, for example, so they should be structured similarly).
+respect programmers' time in learning your language.
 
 use friendly names and semantics. ruby is friendly; use `def` for your
 functions. don't overload terminology from other languages with different
 semnatics: for example, use `typeclass` rather than `class`, because `class` in
 other languages means something totally different.
 
-call it null, not unit. everyone knows null and it means the same thing.
+call it null, not unit. everyone knows null and it means the same thing. or
+nil, it's a nice word.
 
 reduce the numbers of ways to do things — lean on macros for metaprogramming
 the compiler. for example, use regular structs for setting variables in `with`
@@ -43,15 +45,12 @@ code in the exe/ folder of the package.
 You should switch the weird `with` and `import` syntax to use structs instead of
 vectors and tuples once you have struct support. Much nicer to read:
 
-    (with {
-        x: 10
-        y: 20
-      } (+ x y))
+    (with {x: 10
+           y: 20}
+           (+ x y))
 
-    (import {
-        ast: './ast'
-        ir:  './ir'
-      })
+    (import {ast: './ast'
+             ir:  './ir'})
 
 Get structs working sooner rather than later. Don't need runtime support to
 support them in `with`.
@@ -81,13 +80,13 @@ lowering.)
 
 type constraints for functions should be inline:
 
-    (def fn [ (Numeric x) ]
+    (def fn [(Numeric x)]
       ( ... ))
 
 to upcast/hide the type of an implementation detail, rather than annotating the
 function directly, annotate the body:
 
-    (def fn [ (Numeric x) ]
+    (def fn [(Numeric x)]
       (Numeric
         ( ... )))
 
@@ -188,13 +187,11 @@ time. easy to build more expressive primitives that work with packages: e.g.
 
 import should be as follows:
 
-    (import [
-        (package 'express')
-        (package 'con')
-        (package 'html-parser')
-        (package './some-file')
-        (package './other-file' { as: 'some-name' })
-      ])
+    (import [(package 'express')
+             (package 'express')
+             (package 'html-parser')
+             (package './some-file')
+             (as 'some-name' (package './other-file'))])
 
 relative path imports are assigned their base file name, if it's possible. if
 it's not possible (invalid characters or the name is already taken), throw an
@@ -214,6 +211,22 @@ idea: import entire directories, and each function is namespaced as:
 if you import using the array or string form, then just:
 
     file-base-name.fn-name
+
+this is great and basically how java does it. steal this.
+
+
+
+for exporting, use `public`, `package`, `protected`, `private` modifiers a la
+every language. `private` is default if nothing is specified. Probably should
+not even define `private`, since it does nothing.
+
+    (public def hello-world []
+      (println 'hello world'))
+
+Make sure that it's possible to use public defs and macros — if there are
+nominal types specified whose packaging isn't public (or rather, is
+more-restrictive than the function, so that this correctness check is possible
+for `package`, `protected`, and `private` too), throw a type error.
 
 
 
@@ -260,3 +273,158 @@ should it just be entirely vectors? That makes the most sense, but feels wrong
 for some reason. Probably feels weird because of the array-of-arrays for a
 single var decl: maybe have it so that you can either have an array of arrays,
 or a single two-element array of var-name and value.
+
+
+
+The `typeclass` function is an interface to the lambda-cross multimap type
+system. Typeclasses represent a named type scope, and you can define functions
+within that scope using lambda-cross multimap type definitions.
+
+You call the functions by referencing the typeclass itself; e.g.
+
+    (Monad.bind monadic-object (-> [x] (+ x 1)))
+
+The `use` and `with` functions must understand typeclass scopes and work with
+them, such that the methods are in scope without referencing the typeclass if
+you use either of those two methods.
+
+Probably `return` should be called `create` or sth less confusing. `Monad.of`,
+maybe?
+
+This gets rid of the awkwardness of lambda-cross non-determinism when
+confronted with multiple values in the same scope that are ambiguously typed
+(e.g. `y` is either the function `y(Int, Int) { ... }` or the function
+`y(Rational, Rational) { ... }` and where the bodies are different, and is
+called with `a` and `b` which are both Ints and Rationals). Since typeclasses
+can only contain function definitions, the values always disambiguate the
+functions — there is no interface to the multimap scope for values.
+
+But — hmmm. What about functions that operate on functions? Probably can
+disambiguate eventually, since they'll necessarily be eventually doing
+*something* with values (or else never actually called). Do this by making
+multimap function definitions lazy: only actually instantiate them when you see
+them called.
+
+Nvm, also `def` should hook into lambda-cross multimaps. Otherwise can't unify
+basic things like:
+
+   (def add-five [x]
+     (+ x 5))
+
+As soon as you pass a float and an int, compiler's all: yo wtf, you can't do
+that.
+
+No, that's not true, you don't need multimaps for unification of that: there's
+only a single function body. for that you just generate versions of the fn for
+every concrete type passed in, and throw if the type doesn't work with the
+functions referenced. Multimaps are only needed when there are different
+function bodies for different types.
+
+
+
+need an "and" type that composes typeclasses, structural types. so you can say
+something must fit these two typeclasses, or these two structural types, or
+this combo of structural types and typeclasses... basically, anything the type
+system can infer implicitly you should have an explicit hook for as well.
+
+should ban combining nominal types with anything else, because, well... you've
+already demanded the most strict thing possible, which is a nominal type.
+
+well, no, don't ban them, since then nominal types can't get passed as params in
+certain cases (if the params will be &-ed together).
+
+
+
+Structural typing is super useful. But structural *subtyping* is tricky with
+tree-shaking and typeclass specialization: you have to have a vtable, and it
+might be tricky to figure out which functions actually are going to get called.
+Maybe you could track which functions call others with subtype types? Find the
+concrete types that need to be virtualized in that function and only include
+the functions that get called dynamically inside the subtype function.
+
+Sounds like subtypes should be a later feature, distinct from regular
+structural types since they're more complicated (and have different perf
+characteristics, since a vtable gets involved). "Structural type" vs
+"interface"?
+
+Jeez, structural typing with typeclasses in general sounds annoying, since the
+typeclass functions are by definition not namespaced (they specialize a name to
+a type). If someone else in a different library lays claim to a set of fields
+that you also want to specialize a typeclass for, you're boned.
+
+Maybe structural types aren't a workable idea for this kind of type system.
+Instead use Rust-style nominal types + record instantiation.
+
+Nah, you can have structural types: you just can't use them for typeclass
+specialization (it makes no sense). Anything passed to a function that takes a
+structural type gets a pointer to its function table passed along with it, and
+the calls are virtual fn calls. Don't call structural types "types," call them
+interfaces or something. The function's inferred type when using a
+structurally-typed param and containing a call to a typeclass method is "an
+argument matching subtype X and that has a function defined for it in typeclass
+Y."
+
+This does mean you need Rust-style nominal instantiation in general, although
+the default "Object" or w/e class could have the "Object" name left out
+optionally, so you get inline JSON-style instantiation for basic
+structs/records.
+
+
+
+You should have syntax for accessing a field on an optional object if it exists
+and otherwise returning null. That makes null checks much less painful. Prob
+just use the Swift-style ?. operator:
+
+    object?.field?.field
+
+Similarly, a ? at the end of a type should be syntax for defining it as
+Optional<Type>.
+
+Ditto for !. and ! with Result, like Rust. The equivalent ?# and !# syntaxes
+should work as well.
+
+Should ban those operators from function names, unlike Ruby. Would be too
+confusing to use both.
+
+
+
+A guard function a la Swift's guard keyword would be cool. Have it work
+explicitly with Optionals, as opposed to Swift's "truthiness" checking. After a
+guard statement, the variable's type should have the option unwrapped. This
+should also work with `if`s that are guaranteed to exit from the block (e.g.
+will definitely execute a return, throw, etc). Also should work with booleans,
+bc, y'know.
+
+
+type system should track mutability — not just mutability in the sense of "can
+this variable be bound to something else," but also in the Ruby-style `freeze`
+sense. default is frozen.
+
+
+
+consider the type system as a constraint system. you have various type objects
+which may be constrained, either to RealizedTypes (e.g. Int32, whatever) or can
+be constrained by the typeclass methods that need to exist for them, or can be
+constrained by the functions that need to be able to be called on them.
+
+
+
+how much of the memory allocation system can you guarantee at compile time
+(e.g. have a "type" system for)? for example, could you have a function like:
+
+   (region
+     (your-code-goes-here ...))
+
+that statically guarantees no memory escapes the region?
+
+
+
+def, macro, val, type should all be lazily-evaluated. calls are eagerly
+evaluated: to call a thing, it must already be defined, and calling it means
+that it is immediately called (and possibly forced to evaluate, if the
+definition hadn't yet been). the niceties of haskell's laziness for defining
+stuff, without making debugging and optimization mind-bending.
+
+like rust, types can self-refer only in terms of pointers: you can't have
+recursive definitions without pointers, because otherwise the object is of
+unknown (and, well, infinite) size.

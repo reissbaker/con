@@ -2,10 +2,9 @@
 this is a test file to make sure the con compiler works.
 *;
 
-(def add-five [ x ]
-  (let [
-      (y 5)
-    ] (+ x y)))
+(def add-five [x]
+  (let [(y 5)]
+    (+ x y)))
 
 (add-five 5)
 
@@ -17,7 +16,7 @@ this is a test file to make sure the con compiler works.
 
 (val null-val null)
 
-;; export is a macro that exports the val, def, or defmacro it precedes
-;; (export val version 0)
+;; public is a macro that exports the val, def, or defmacro it precedes
+;; (public val version 0)
 
-(- 5 (+ 3 (add-five 1))
+(- 5 (+ 3 (add-five 1)))

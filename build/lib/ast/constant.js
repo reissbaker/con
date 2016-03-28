@@ -7,16 +7,8 @@ var __extends = (this && this.__extends) || function (d, b) {
 var ast_node_1 = require('./ast-node');
 (function (ConstantType) {
     ConstantType[ConstantType["Int32"] = 0] = "Int32";
-    ConstantType[ConstantType["Int16"] = 1] = "Int16";
-    ConstantType[ConstantType["Int8"] = 2] = "Int8";
-    ConstantType[ConstantType["Uint32"] = 3] = "Uint32";
-    ConstantType[ConstantType["Uint16"] = 4] = "Uint16";
-    ConstantType[ConstantType["Uint8"] = 5] = "Uint8";
-    ConstantType[ConstantType["Float64"] = 6] = "Float64";
-    ConstantType[ConstantType["Float32"] = 7] = "Float32";
-    ConstantType[ConstantType["Float16"] = 8] = "Float16";
-    ConstantType[ConstantType["Float8"] = 9] = "Float8";
-    ConstantType[ConstantType["Bool"] = 10] = "Bool";
+    ConstantType[ConstantType["Float64"] = 1] = "Float64";
+    ConstantType[ConstantType["Bool"] = 2] = "Bool";
 })(exports.ConstantType || (exports.ConstantType = {}));
 var ConstantType = exports.ConstantType;
 var Constant = (function (_super) {

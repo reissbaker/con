@@ -11,14 +11,14 @@ function bindBuiltIns(scope) {
 }
 exports.bindBuiltIns = bindBuiltIns;
 function set(scope, builder) {
-    var fnType = new types_1.FnType(builder.argTypes, builder.returnType);
-    scope.set(builder.name, new fn_1.Fn(fnType, builder.body));
+    scope.set(builder.name, new fn_1.Fn(builder.fnType, builder.body));
 }
 function arithmetic(name, fn) {
+    var numType = new types_1.TypeVar(types_1.Num);
+    var fnType = types_1.FnType.build().takes(numType).takes(numType).returns(numType);
     return {
         name: name,
-        argTypes: [],
-        returnType: null,
+        fnType: fnType,
         body: function (scope, args) {
             if (args.length !== 2)
                 throw new Error("TODO: remove me. " + name + " should be typechecked");
@@ -30,7 +30,7 @@ function arithmetic(name, fn) {
                 if (typeof aVal === 'number' && typeof bVal === 'number') {
                     // TODO: handle floats
                     var val = fn(a.value, b.value);
-                    return new primitive_1.Primitive(types.PrimitiveType.Int32, val);
+                    return new primitive_1.Primitive(types.Int32, val);
                 }
                 throw new Error("TODO: remove me. " + name + " should be typechecked");
             }

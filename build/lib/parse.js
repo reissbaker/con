@@ -9,18 +9,24 @@ var intRegex = /^(-)?\d+$/;
 function parse(tokens) {
     var root = new root_node_1.RootNode();
     var current = root;
+    var parenMatcher = new MatchCounter();
+    var bracketMatcher = new MatchCounter();
     tokens.forEach(function (t) {
         if (t.tokenType === token.OpenParen) {
             current = current.addChild(new list_1.List(t.line));
+            parenMatcher.open(t.line);
         }
         else if (t.tokenType === token.CloseParen) {
             current = current.parent;
+            parenMatcher.close();
         }
         else if (t.tokenType === token.OpenBracket) {
             current = current.addChild(new vector_1.Vector(t.line));
+            bracketMatcher.open(t.line);
         }
         else if (t.tokenType === token.CloseBracket) {
             current = current.parent;
+            bracketMatcher.close();
         }
         else if (t.tokenType === token.Reference || t.tokenType === token.Operator) {
             if (t.source === "true") {
@@ -45,7 +51,35 @@ function parse(tokens) {
             throw new Error('unknown token type');
         }
     });
+    if (!parenMatcher.matched())
+        throw new Error("Unmatched ( on line " + parenMatcher.lastLine);
+    if (!bracketMatcher.matched())
+        throw new Error("Unmatched [ on line " + parenMatcher.lastLine);
     return root;
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = parse;
+var MatchCounter = (function () {
+    function MatchCounter() {
+        this._count = 0;
+        this._lastLine = -1;
+    }
+    MatchCounter.prototype.open = function (line) {
+        this._lastLine = line;
+        this._count++;
+    };
+    MatchCounter.prototype.close = function () {
+        this._count--;
+    };
+    MatchCounter.prototype.matched = function () {
+        return this._count === 0;
+    };
+    Object.defineProperty(MatchCounter.prototype, "lastLine", {
+        get: function () {
+            return this._lastLine;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    return MatchCounter;
+})();

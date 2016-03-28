@@ -18,6 +18,8 @@ function parse(line) {
     var lastTokenType = null;
     var i = 1;
     for (i; i <= line.length; i++) {
+        if (line[i] === '\n')
+            lineNumber++;
         var substr = line.substring(beginIndex, i);
         currentTokenType = findValidTokenTypeFor(substr);
         if (currentTokenType) {
@@ -29,8 +31,6 @@ function parse(line) {
                 throw new Error(parseErrorString(lineNumber, substr));
             }
             tokens.push(lastTokenType.token(prevSubstr_1, lineNumber));
-            if (lastTokenType === token.Newline)
-                lineNumber++;
             beginIndex = i - 1;
             currentTokenType = findValidTokenTypeFor(line.substring(beginIndex, i));
             lastTokenType = currentTokenType;
@@ -57,14 +57,14 @@ function filterTypes(types) {
 function filterType(tokenType) {
     return function (t) { return t.tokenType !== tokenType; };
 }
-function findValidTokenTypeFor(string) {
+function findValidTokenTypeFor(str) {
     for (var i = 0; i < token.allTypes.length; i++) {
         var tokenType = token.allTypes[i];
-        if (tokenType.match(string))
+        if (tokenType.match(str))
             return tokenType;
     }
     return null;
 }
-function parseErrorString(line, string) {
-    return "Unparseable string on line " + line + ": " + string;
+function parseErrorString(line, str) {
+    return "Unparseable string on line " + line + ": " + str;
 }

@@ -1,6 +1,7 @@
 'use strict';
 var match_ir_1 = require('../ir/match-ir');
 var value_1 = require('./value');
+var constant_1 = require('../ast/constant');
 var scope_1 = require('./scope');
 var fn_1 = require('./fn');
 var primitive_1 = require('./primitive');
@@ -13,12 +14,25 @@ function interpret(ast) {
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.default = interpret;
-var nullVal = new value_1.Value(types.PrimitiveType.Null);
+var nullVal = new value_1.Value(types.Null);
 function interpretWithScope(ast, scope) {
     return match_ir_1.match(ast, {
         Constant: function (ast) {
-            // TODO: infer type
-            return new primitive_1.Primitive(null, ast.value);
+            var inferredType;
+            switch (ast.constantType) {
+                case constant_1.ConstantType.Int32:
+                    inferredType = types.Int32;
+                    break;
+                case constant_1.ConstantType.Float64:
+                    inferredType = types.Float64;
+                    break;
+                case constant_1.ConstantType.Bool:
+                    inferredType = types.Bool;
+                    break;
+                default:
+                    throw new Error("unknown constant type on line " + ast.line);
+            }
+            return new primitive_1.Primitive(inferredType, ast.value);
         },
         Reference: function (ast) {
             // TODO: throw error on reference to undeclared var
@@ -41,7 +55,7 @@ function interpretWithScope(ast, scope) {
         },
         DefNode: function (ast) {
             // TODO: infer type
-            var fnType = new types.FnType(null, null);
+            var fnType = new types.FnType(null);
             scope.set(ast.defName, new fn_1.Fn(fnType, function (scope, args) {
                 if (ast.argList.args.length !== args.length) {
                     // TODO: rely on typechecking and remove this

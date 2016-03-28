@@ -6,7 +6,7 @@ import { Value } from './value';
 import { Vector } from '../ast/vector';
 import { List } from '../ast/list';
 import { Reference } from '../ast/reference';
-import { Constant } from '../ast/constant';
+import { Constant, ConstantType } from '../ast/constant';
 import { RootNode } from '../ast/root-node';
 import { DefNode } from '../ir/def-node';
 import { CallNode } from '../ir/call-node';
@@ -26,13 +26,28 @@ export default function interpret(ast: AstNode) {
   return interpretWithScope(ast, scope);
 }
 
-const nullVal = new Value(types.PrimitiveType.Null);
+const nullVal = new Value(types.Null);
 
 function interpretWithScope(ast: AstNode, scope: ScopeTree): Value {
   return match<Value>(ast, {
     Constant(ast: Constant<any>) {
-      // TODO: infer type
-      return new Primitive(null, ast.value);
+      let inferredType: types.NominalType;
+
+      switch(ast.constantType) {
+        case ConstantType.Int32:
+          inferredType = types.Int32;
+          break;
+        case ConstantType.Float64:
+          inferredType = types.Float64;
+          break;
+        case ConstantType.Bool:
+          inferredType = types.Bool;
+          break;
+        default:
+          throw new Error(`unknown constant type on line ${ast.line}`);
+      }
+
+      return new Primitive(inferredType, ast.value);
     },
 
     Reference(ast: Reference) {
@@ -62,7 +77,7 @@ function interpretWithScope(ast: AstNode, scope: ScopeTree): Value {
 
     DefNode(ast: DefNode) {
       // TODO: infer type
-      const fnType = new types.FnType(null, null);
+      const fnType = new types.FnType(null);
 
       scope.set(ast.defName, new Fn(fnType, (scope, args) => {
         if(ast.argList.args.length !== args.length) {
