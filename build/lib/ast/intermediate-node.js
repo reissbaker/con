@@ -16,6 +16,14 @@ var IntermediateNode = (function (_super) {
         node.parent = this;
         return node;
     };
+    IntermediateNode.prototype.overwriteChildren = function (children) {
+        var _this = this;
+        this._children = children;
+        this._children.forEach(function (child) {
+            child.parent = _this;
+        });
+        return children;
+    };
     Object.defineProperty(IntermediateNode.prototype, "children", {
         get: function () {
             return this._children;

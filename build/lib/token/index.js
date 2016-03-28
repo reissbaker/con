@@ -15,7 +15,7 @@ exports.BlockComment = def({
 });
 exports.LineComment = def({
     name: "LineComment",
-    match: matchers.regex(";[^\\n\\*]*"),
+    match: matchers.regex("(;|;;[^\\n]*)"),
     validate: function (str) {
         return str.length > 1 && str[1] == ";";
     }

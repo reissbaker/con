@@ -35,7 +35,9 @@ function interpretWithScope(ast, scope) {
             return new primitive_1.Primitive(inferredType, ast.value);
         },
         Reference: function (ast) {
-            // TODO: throw error on reference to undeclared var
+            var val = scope.lookup(ast.refname);
+            if (!val)
+                throw new Error("Reference to undefined variable " + ast.refname + " on " + ast.line);
             return scope.lookup(ast.refname);
         },
         Vector: function (ast) {
@@ -61,7 +63,6 @@ function interpretWithScope(ast, scope) {
                     // TODO: rely on typechecking and remove this
                     throw new Error(ast.defName + " expects " + ast.argList.args.length + " arguments; recieved " + args.length);
                 }
-                // TODO: typecheck
                 var childScope = scope.child();
                 for (var i = 0; i < args.length; i++) {
                     childScope.set(ast.argList.args[i].refname, args[i]);
@@ -73,7 +74,7 @@ function interpretWithScope(ast, scope) {
         CallNode: function (ast) {
             var defnVal = scope.lookup(ast.refname);
             if (!defnVal) {
-                throw new Error("reference to undeclared variable " + ast.refname + " on line " + ast.line);
+                throw new Error("reference to undeclared function " + ast.refname + " on line " + ast.line);
             }
             if (defnVal instanceof fn_1.Fn) {
                 // TODO: typecheck

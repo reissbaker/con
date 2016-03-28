@@ -109,18 +109,32 @@ function parseLet(ast, head) {
     throw new Error("Error line " + loweredVarListNode.line + ": second argument to let must be a vector");
 }
 function parseVarList(varListNode) {
-    var varListTuples = varListNode.children.map(function (child) {
-        if (child instanceof call_node_1.CallNode) {
-            if (child.args.length !== 1) {
-                throw new Error("Error line " + child.line + ": tuples in let must be two-element lists");
-            }
-            return new var_tuple_node_1.VarTupleNode({
-                line: child.line,
-                refname: child.refname,
-                body: child.args[0],
-            });
+    // If this is a single-dimensional array, rather than a multi-dimensional array, rewrite it as a
+    // multidimensional one before parsing.
+    if (varListNode.children.length === 2) {
+        var head = varListNode.children[0];
+        if (head instanceof reference_1.Reference) {
+            var shadowParent = new vector_1.Vector(varListNode.line);
+            var children = varListNode.children;
+            varListNode.overwriteChildren([shadowParent]);
+            shadowParent.overwriteChildren(children);
         }
-        console.log(child);
+    }
+    var varListTuples = varListNode.children.map(function (child) {
+        if (child instanceof vector_1.Vector) {
+            if (child.children.length !== 2) {
+                throw new Error("Error line " + child.line + ": tuples in let must be two-element vectors");
+            }
+            var sym = child.children[0];
+            var val = child.children[1];
+            if (sym instanceof reference_1.Reference) {
+                return new var_tuple_node_1.VarTupleNode({
+                    line: child.line,
+                    refname: sym.refname,
+                    body: val,
+                });
+            }
+        }
         throw new Error("Error line " + child.line + ": tuples in let must be lists of symbols and bodies");
     });
     return new var_list_node_1.VarListNode({
