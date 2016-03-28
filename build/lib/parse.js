@@ -65,7 +65,8 @@ var MatchCounter = (function () {
         this._lastLine = -1;
     }
     MatchCounter.prototype.open = function (line) {
-        this._lastLine = line;
+        if (this._count === 0)
+            this._lastLine = line;
         this._count++;
     };
     MatchCounter.prototype.close = function () {
