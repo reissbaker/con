@@ -20,7 +20,7 @@ but reserve a slot for them in the scope tree.
 
 also lazily evaluate `type`, `val`, and `def` bodies at macro time, similarly
 reserving a slot for them in the scope tree pointing to a thunk. referencing
-them forces the thunk to evaluate.
+them in a macro forces the thunk to evaluate.
 *;
 (val z (add-five 10))
 
