@@ -13,19 +13,25 @@ const intRegex = /^(-)?\d+$/;
 export default function parse(tokens: token.Token[]) {
   const root = new RootNode();
   let current: IntermediateNode = root;
+  const parenMatcher = new MatchCounter();
+  const bracketMatcher = new MatchCounter();
 
   tokens.forEach((t) => {
     if(t.tokenType === token.OpenParen) {
       current = current.addChild(new List(t.line));
+      parenMatcher.open(t.line);
     }
     else if(t.tokenType === token.CloseParen) {
       current = current.parent;
+      parenMatcher.close();
     }
     else if(t.tokenType === token.OpenBracket) {
       current = current.addChild(new Vector(t.line));
+      bracketMatcher.open(t.line);
     }
     else if(t.tokenType === token.CloseBracket) {
       current = current.parent;
+      bracketMatcher.close();
     }
     else if(t.tokenType === token.Reference || t.tokenType === token.Operator) {
       if(t.source === "true") {
@@ -51,5 +57,30 @@ export default function parse(tokens: token.Token[]) {
     }
   });
 
+  if(!parenMatcher.matched()) throw new Error(`Unmatched ( on line ${parenMatcher.lastLine}`);
+  if(!bracketMatcher.matched()) throw new Error(`Unmatched [ on line ${parenMatcher.lastLine}`);
+
   return root;
+}
+
+class MatchCounter {
+  private _count = 0;
+  private _lastLine = -1;
+
+  open(line: number) {
+    this._lastLine = line;
+    this._count++;
+  }
+
+  close() {
+    this._count--;
+  }
+
+  matched() {
+    return this._count === 0;
+  }
+
+  get lastLine() {
+    return this._lastLine;
+  }
 }
