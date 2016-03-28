@@ -22,7 +22,7 @@ export const BlockComment = def({
 
 export const LineComment = def({
   name: "LineComment",
-  match: matchers.regex(";[^\\n\\*]*"),
+  match: matchers.regex("(;|;;[^\\n]*)"),
   validate(str: string) {
     return str.length > 1 && str[1] == ";";
   }
