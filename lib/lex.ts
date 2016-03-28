@@ -19,6 +19,8 @@ function parse(line: string): token.Token[] {
   let i = 1;
 
   for(i; i <= line.length; i++) {
+    if(line[i] === '\n') lineNumber++;
+
     const substr = line.substring(beginIndex, i);
 
     currentTokenType = findValidTokenTypeFor(substr);
@@ -34,7 +36,6 @@ function parse(line: string): token.Token[] {
       }
 
       tokens.push(lastTokenType.token(prevSubstr, lineNumber));
-      if(lastTokenType === token.Newline) lineNumber++;
       beginIndex = i - 1;
       currentTokenType = findValidTokenTypeFor(line.substring(beginIndex, i));
       lastTokenType = currentTokenType;
