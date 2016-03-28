@@ -87,8 +87,6 @@ function interpretWithScope(ast: AstNode, scope: ScopeTree): Value {
           throw new Error(`${ast.defName} expects ${ast.argList.args.length} arguments; recieved ${args.length}`);
         }
 
-        // TODO: typecheck
-
         const childScope = scope.child();
         for(let i = 0; i < args.length; i++) {
           childScope.set(ast.argList.args[i].refname, args[i]);
