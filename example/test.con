@@ -14,8 +14,7 @@ this is a test file to make sure the con compiler works.
 
 (add-five 5)
 
-;; lazily evaluate `val` and `def` calls during macro expansion.
-;; strictly evaluate them at runtime.
+;; lazily evaluate `val`, `def`, `macro`, and `type` calls.
 (val z (add-five 10))
 
 (val t true)
