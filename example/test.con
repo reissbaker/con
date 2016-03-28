@@ -15,8 +15,9 @@ this is a test file to make sure the con compiler works.
 (add-five 5)
 
 ;*
-lazily evaluate `val`, `def`, `macro`, and `type` bodies during typechecking,
-but reserve a slot for them in the scope tree.
+lazily infer types for `val`, `def`, `macro`, and `type` bodies during
+typechecking, but reserve a slot for them in the scope tree. (well, `macro`
+always takes an AST node and returns an AST node, but yeah.)
 
 also lazily evaluate `type`, `val`, and `def` bodies at macro time, similarly
 reserving a slot for them in the scope tree pointing to a thunk. referencing
