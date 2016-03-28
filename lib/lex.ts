@@ -70,14 +70,14 @@ function filterType(tokenType: token.TokenType): (t: token.Token) => boolean {
   return (t: token.Token) => t.tokenType !== tokenType;
 }
 
-function findValidTokenTypeFor(string: string): token.TokenType {
+function findValidTokenTypeFor(str: string): token.TokenType {
   for(var i = 0; i < token.allTypes.length; i++) {
     const tokenType = token.allTypes[i];
-    if(tokenType.match(string)) return tokenType;
+    if(tokenType.match(str)) return tokenType;
   }
   return null;
 }
 
-function parseErrorString(line: number, string: string) {
-  return `Unparseable string on line ${line}: ${string}`;
+function parseErrorString(line: number, str: string) {
+  return `Unparseable string on line ${line}: ${str}`;
 }
