@@ -101,7 +101,7 @@ function interpretWithScope(ast: AstNode, scope: ScopeTree): Value {
     CallNode(ast: CallNode) {
       const defnVal = scope.lookup(ast.refname);
       if(!defnVal) {
-        throw new Error(`reference to undeclared variable ${ast.refname} on line ${ast.line}`);
+        throw new Error(`reference to undeclared function ${ast.refname} on line ${ast.line}`);
       }
 
       if(defnVal instanceof Fn) {
