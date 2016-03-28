@@ -106,9 +106,9 @@ function prettyStringWithDepth(ast: AstNode, depth: number) {
     },
 
     LetNode(ast: LetNode) {
-      pieces.push(`\n${spacing(depth)}let {\n`);
+      pieces.push(`\n${spacing(depth)}let {`);
       ast.varListNode.tuples.forEach((tuple) => {
-        pieces.push(`${spacing(depth + 1)}${tuple.refname}: `);
+        pieces.push(`\n${spacing(depth + 1)}${tuple.refname}: `);
         pieces.push(withoutStartingNewline(prettyStringWithDepth(tuple.body, depth + 1)));
       });
       pieces.push(`\n${spacing(depth)}} {`);
