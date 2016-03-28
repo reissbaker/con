@@ -14,7 +14,10 @@ this is a test file to make sure the con compiler works.
 
 (add-five 5)
 
-;; lazily evaluate `val`, `def`, `macro`, and `type` calls.
+;*
+lazily evaluate `val`, `def`, `macro`, and `type` bodies, but reserve a slot for
+them in the scope tree.
+*;
 (val z (add-five 10))
 
 (val t true)
