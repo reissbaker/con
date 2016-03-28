@@ -51,7 +51,9 @@ function interpretWithScope(ast: AstNode, scope: ScopeTree): Value {
     },
 
     Reference(ast: Reference) {
-      // TODO: throw error on reference to undeclared var
+      const val = scope.lookup(ast.refname);
+      if(!val) throw new Error(`Reference to undefined variable ${ast.refname} on ${ast.line}`);
+
       return scope.lookup(ast.refname);
     },
 
