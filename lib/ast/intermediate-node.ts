@@ -11,6 +11,14 @@ export abstract class IntermediateNode extends AstNode {
     return node;
   }
 
+  overwriteChildren(children: AstNode[]) {
+    this._children = children;
+    this._children.forEach((child) => {
+      child.parent = this;
+    });
+    return children;
+  }
+
   get children() {
     return this._children;
   }

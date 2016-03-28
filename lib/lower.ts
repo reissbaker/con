@@ -129,20 +129,34 @@ function parseLet(ast: List, head: Reference) {
 }
 
 function parseVarList(varListNode: Vector) {
-  const varListTuples: VarTupleNode[] = varListNode.children.map((child) => {
-    if(child instanceof CallNode) {
-      if(child.args.length !== 1) {
-        throw new Error(`Error line ${child.line}: tuples in let must be two-element lists`);
-      }
+  // If this is a single-dimensional array, rather than a multi-dimensional array, rewrite it as a
+  // multidimensional one before parsing.
+  if(varListNode.children.length === 2) {
+    const head = varListNode.children[0];
+    if(head instanceof Reference) {
+      const shadowParent = new Vector(varListNode.line);
+      const children = varListNode.children;
+      varListNode.overwriteChildren([ shadowParent ]);
+      shadowParent.overwriteChildren(children);
+    }
+  }
 
-      return new VarTupleNode({
-        line: child.line,
-        refname: child.refname,
-        body: child.args[0],
-      });
+  const varListTuples: VarTupleNode[] = varListNode.children.map((child) => {
+    if(child instanceof Vector) {
+      if(child.children.length !== 2) {
+        throw new Error(`Error line ${child.line}: tuples in let must be two-element vectors`);
+      }
+      const sym = child.children[0];
+      const val = child.children[1];
+      if(sym instanceof Reference) {
+        return new VarTupleNode({
+          line: child.line,
+          refname: sym.refname,
+          body: val,
+        });
+      }
     }
 
-    console.log(child);
     throw new Error(`Error line ${child.line}: tuples in let must be lists of symbols and bodies`);
   });
 
