@@ -2,9 +2,15 @@
 this is a test file to make sure the con compiler works.
 *;
 
-(def add-five [x]
-  (let [(y 5)]
+(def add-two [x]
+  (let [y 2]
     (+ x y)))
+
+;; let can take multi-dimensional arrays, similar to let* from Racket
+(def add-five [x]
+  (let [[y 3]
+        [z (add-two 0)]]
+    (+ z (+ y x))))
 
 (add-five 5)
 
