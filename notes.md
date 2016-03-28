@@ -428,3 +428,10 @@ stuff, without making debugging and optimization mind-bending.
 like rust, types can self-refer only in terms of pointers: you can't have
 recursive definitions without pointers, because otherwise the object is of
 unknown (and, well, infinite) size.
+
+
+
+similar to Go, pointers should be implicitly dereferenced when using
+dot-accessors. for example, x.y should retrieve the value of y if y is an
+unboxed value, and should retrieve the value stored at memory location y if y
+is a pointer.
