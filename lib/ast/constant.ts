@@ -4,15 +4,7 @@ import { AstNode } from './ast-node';
 
 export enum ConstantType {
   Int32,
-  Int16,
-  Int8,
-  Uint32,
-  Uint16,
-  Uint8,
   Float64,
-  Float32,
-  Float16,
-  Float8,
   Bool,
 }
 
